@@ -24,3 +24,34 @@ def NNN_loss(y_pred, y_true, derivative=False):
         return grad / len(y_pred)  # Gradient with respect to the input
 
     return np.mean(-y_pred[range(len(y_pred)), y_true])
+
+def balanced_train_test_split(X, y, test_size, random_state=None):
+    classes = np.unique(y)
+    X_train, X_test = [], []
+    y_train, y_test = [], []
+
+    for cls in classes:
+        # Get indices for the current class
+        cls_indices = np.where(y == cls)[0]
+        cls_X = X[cls_indices]
+        cls_y = y[cls_indices]
+
+        # Perform train_test_split for the current class
+        X_cls_train, X_cls_test, y_cls_train, y_cls_test = train_test_split(
+            cls_X, cls_y, train_size=test_size, random_state=random_state
+        )
+
+        # Append the results for this class
+        X_train.append(X_cls_train)
+        X_test.append(X_cls_test)
+        y_train.append(y_cls_train)
+        y_test.append(y_cls_test)
+
+    # Concatenate all classes
+    X_train = np.vstack(X_train)
+    X_test = np.vstack(X_test)
+    y_train = np.hstack(y_train)
+    y_test = np.hstack(y_test)
+
+    return X_train, X_test, y_train, y_test
+
