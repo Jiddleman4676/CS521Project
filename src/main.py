@@ -19,7 +19,7 @@ from sklearn.svm import SVC
 from sklearn.datasets import make_classification
 
 # Hyperparameters (to make the program run faster, change training_size to 0.99 or EPOCHS to 10)
-training_size = .99
+training_size = .1
 LEARNING_RATE = 1.0
 EPOCHS = 30
 layer_sizes = [21, 128, 128, 3]
