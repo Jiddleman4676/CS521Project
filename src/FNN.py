@@ -7,17 +7,15 @@ class FeedforwardNeuralNetwork:
     Each layer connects to the next, forming a feedforward structure.
     """
     def __init__(self, layer_sizes, activations):
-        # Initialize the layers of the network
         self.layers = []
         for i in range(len(layer_sizes) - 1):
             self.layers.append(Layer(layer_sizes[i], layer_sizes[i+1], activations[i]))
 
     def forward(self, x):
         """
-        Performs a forward pass through the network.
+        Performs a forward pass through each layer of the network.
         Each layer processes the input sequentially, returning the final output.
         """
-        # Forward pass through each layer
         for layer in self.layers:
             x = layer.forward(x)
         return x
@@ -47,15 +45,17 @@ class FeedforwardNeuralNetwork:
         """
         for epoch in range(epochs):
             print("Epoch: ", epoch + 1, " out of ", epochs)
-            indices = np.random.permutation(len(X)) # Shuffle data indices for each epoch
+            
+            # shuffle data indices
+            indices = np.random.permutation(len(X))
             for i in range(0, len(X), batch_size):
                 batch_indices = indices[i:i + batch_size]
                 batch_X, batch_Y = X[batch_indices], Y[batch_indices]
 
-                # Forward and backward pass for each sample in the batch
+                # forward and backward pass for each sample in the batch
                 for x, y_true in zip(batch_X, batch_Y):
                     y_pred = self.forward(x)
                     self.backward(y_pred, y_true, loss_derivative)
 
-                # After processing batch, run gd
+                # run gd
                 self.gd(learning_rate, batch_size)
