@@ -1,21 +1,20 @@
 import time
 import numpy as np
 import pandas as pd
-import random
-from FNN import FeedforwardNeuralNetwork
-from utils import sigmoid, NNN_loss, balanced_train_test_split
 from matplotlib import pyplot as plt
-from sklearn.model_selection import train_test_split
 
-#Model comparison
+# Used for model comparison
 from sklearn.metrics import accuracy_score, classification_report
-from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import GaussianNB
 from sklearn.svm import SVC
-from sklearn.datasets import make_classification
+from sklearn.tree import DecisionTreeClassifier
 
-LEARNING_RATE = 1.0
-EPOCHS = 10
+from FNN import FeedforwardNeuralNetwork
+from utils import sigmoid, NNN_loss
+
+LEARNING_RATE = .01
+EPOCHS = 30
 layer_sizes = [21, 128, 128, 3]
 
 # Load CSV into a DataFrame
@@ -24,7 +23,6 @@ data = df.to_numpy()
 y = data[:, 0]  # First column
 y = y.astype(int)
 
-# Assume y is a NumPy array of class labels
 unique_classes, counts = np.unique(y, return_counts=True)
 
 # Print the count for each class
@@ -33,16 +31,12 @@ for cls, count in zip(unique_classes, counts):
 
 X = data[:, 1:]  # All other columns
 
-# Normalization (from features with varying ranges to a set range of [0,1] for all features.
-data_min = np.min(X, axis=0)  # Minimum value along each feature
-data_max = np.max(X, axis=0)  # Maximum value along each feature
+data_min = np.min(X, axis=0)
+data_max = np.max(X, axis=0)
 X = (X - data_min) / (data_max - data_min)
 
 # Split data into train partition and test partition
-X_train, X_test, y_train, y_test = balanced_train_test_split(X, y, random_state=0, test_size=0.99)
-#X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0, test_size=0.99)
-_, X_test, _, y_test = train_test_split(X_test, y_test, random_state=0, test_size=0.2, stratify=y_test)
-
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0, test_size=0.99)
 
 # Assume y is a NumPy array of class labels
 unique_classes, counts = np.unique(y_train, return_counts=True)
@@ -51,12 +45,9 @@ unique_classes, counts = np.unique(y_train, return_counts=True)
 for cls, count in zip(unique_classes, counts):
     print(f"Class {cls}: {count} samples")
 
+_, X_test, _, y_test = train_test_split(X_test, y_test, random_state=0, test_size=0.2, stratify=y_test)
 
-
-
-# Define the FNN model with 784 input neuron, 64 hidden neurons in 2 layers, and 10 output neuron
 nn = FeedforwardNeuralNetwork(layer_sizes=layer_sizes, activations=[sigmoid, sigmoid,sigmoid,sigmoid])
-
 print("training")
 print(f"Layers: {layer_sizes[1:-1]} N: {len(X_train)}, LR: {LEARNING_RATE}, E: {EPOCHS}")
 start_time = time.time()
@@ -70,8 +61,6 @@ training_duration = np.round((end_time - start_time) / 60)  # Calculate duration
 
 # Evaluate model on test data
 
-# Predicting the class of the train and test groups using the neural network model (first iteration is train, second is test)
-
 X_train_test = X_train
 y_train_test = y_train
 
@@ -83,15 +72,15 @@ incorrect_counts_test = np.zeros(3)
 y_pred = np.zeros(len(y_train_test))
 
 for i in range(2):
-    
+
     if i == 1:
         X_train_test = X_test
         y_train_test = y_test
         y_pred = np.zeros(len(y_train_test))
-    
+
     correct_counts = np.zeros(3)
     incorrect_counts = np.zeros(3)
-    
+
     for j in range(len(y_train_test)):
         y_pred_all_probs = nn.forward(X_train_test[j])
         y_pred[j] = np.argmax(y_pred_all_probs)
@@ -115,7 +104,7 @@ print("incorrect_counts_test: ", incorrect_counts_test)
 
 # Model comparison for test dataset
 
-# Neural network
+# Neural Network
 accuracy_nn = np.sum(correct_counts_test) / (np.sum(correct_counts_test) + np.sum(incorrect_counts_test))
 print("Neural Network")
 print(f"Accuracy: {accuracy_nn:.2f}")
@@ -176,25 +165,25 @@ correct_counts = correct_counts_train
 incorrect_counts = incorrect_counts_train
 
 for i in range(2):
-    
+
     if i == 1:
         X_train_test = X_test
         y_train_test = y_test
         correct_counts = correct_counts_test
         incorrect_counts = incorrect_counts_test
-    
+
     # Plotting correct vs incorrect classifications for each digit
-    plt.figure(figsize=(3, 6))
-    plt.bar(diabetes_status, correct_counts, label="Correct", color="blue")
-    plt.bar(diabetes_status, incorrect_counts, bottom=correct_counts, label="Incorrect", color="red")
+    # plt.figure(figsize=(3, 6))
+    # plt.bar(diabetes_status, correct_counts, label="Correct", color="blue")
+    # plt.bar(diabetes_status, incorrect_counts, bottom=correct_counts, label="Incorrect", color="red")
 
     # Labeling the plot
-    plt.xlabel("Diabetic Status")
-    plt.ylabel("Number of Classifications")
-    plt.title(f"Correct vs Incorrect | Layers: {layer_sizes[1:-1]} N: {len(X_train_test)}, LR: {LEARNING_RATE}, E: {EPOCHS}, T:{training_duration} min,Correct: {((np.sum(correct_counts)/len(y_train_test)) * 100):.2f}%")
-    status_names = ["Unafflicted", "Prediabetic", "Diabetic"]
-    plt.xticks(diabetes_status, status_names)
-    plt.legend()
+    # plt.xlabel("Diabetic Status")
+    # plt.ylabel("Number of Classifications")
+    # plt.title(f"Correct vs Incorrect | Layers: {layer_sizes[1:-1]} N: {len(X_train_test)}, LR: {LEARNING_RATE}, E: {EPOCHS}, T:{training_duration} min,Correct: {((np.sum(correct_counts)/len(y_train_test)) * 100):.2f}%")
+    # status_names = ["Unafflicted", "Prediabetic", "Diabetic"]
+    # plt.xticks(diabetes_status, status_names)
+    # plt.legend()
 
     # Show plot
-    plt.show()
+    # plt.show()

@@ -1,12 +1,6 @@
-import time
-import torch
 import numpy as np
-import pandas as pd
-import torch.nn as nn
-from FNN import FeedforwardNeuralNetwork
-from matplotlib import pyplot as plt 
 from sklearn.model_selection import train_test_split
-import random
+
 
 # Store the activation functions along with their derivatives
 def sigmoid(x, derivative=False):
@@ -57,3 +51,34 @@ def balanced_train_test_split(X, y, test_size, random_state=None):
 
     return X_train, X_test, y_train, y_test
 
+def balance_classes(X_train, y_train):
+
+    # Find indices for each class
+    indices_class_0 = np.where(y_train == 0)[0]
+    indices_class_1 = np.where(y_train == 1)[0]
+    indices_class_2 = np.where(y_train == 2)[0]
+
+    # Determine the number of instances in each class
+    size_0 = len(indices_class_0)
+    size_1 = len(indices_class_1)
+    size_2 = len(indices_class_2)
+
+    # Find the maximum class size
+    max_size = max(size_0, size_1, size_2)
+
+    # Oversample each class to match the largest class size
+    oversampled_indices_class_0 = np.random.choice(indices_class_0, max_size, replace=True)
+    oversampled_indices_class_1 = np.random.choice(indices_class_1, max_size, replace=True)
+    oversampled_indices_class_2 = np.random.choice(indices_class_2, max_size, replace=True)
+
+    # Combine oversampled indices
+    oversampled_indices = np.concatenate((oversampled_indices_class_0, oversampled_indices_class_1, oversampled_indices_class_2))
+
+    # Shuffle the indices
+    np.random.shuffle(oversampled_indices)
+
+    # Use the shuffled indices to select features and labels
+    X_balanced = X_train[oversampled_indices]
+    y_balanced = y_train[oversampled_indices]
+
+    return X_balanced, y_balanced
