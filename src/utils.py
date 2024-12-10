@@ -26,6 +26,8 @@ def NNN_loss(y_pred, y_true, derivative=False):
     return np.mean(-y_pred[range(len(y_pred)), y_true])
 
 def balanced_train_test_split(X, y, test_size, random_state=None):
+    test_size = 1 - test_size
+    class_size = int(test_size * (1/3)*len(y))
     classes = np.unique(y)
     X_train, X_test = [], []
     y_train, y_test = [], []
@@ -38,7 +40,7 @@ def balanced_train_test_split(X, y, test_size, random_state=None):
 
         # Perform train_test_split for the current class
         X_cls_train, X_cls_test, y_cls_train, y_cls_test = train_test_split(
-            cls_X, cls_y, train_size=test_size, random_state=random_state
+                cls_X, cls_y, train_size=class_size, random_state=random_state
         )
 
         # Append the results for this class
